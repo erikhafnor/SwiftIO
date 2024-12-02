@@ -15,7 +15,7 @@ public final class CAN {
         self.id = idName.rawValue
         self.baudRate = baudRate
 
-        if let ptr = swifthal_can_open(id) {
+        if let ptr = swifthal_can_open(Int(id)) {
             obj = ptr
         } else {
             print("error: CAN \(id) init failed!")
@@ -32,7 +32,7 @@ public final class CAN {
     @discardableResult
     public func setBaudRate(_ baudRate: Int) -> Result<(), Errno> {
         let result = nothingOrErrno(
-            swifthal_can_baudrate_set(obj, UInt32(baudRate))
+            swifthal_can_baudrate_set(obj, ssize_t(baudRate))
         )
 
         if case .failure(let err) = result {
@@ -46,7 +46,7 @@ public final class CAN {
     @discardableResult
     public func write(_ message: CANMessage) -> Result<(), Errno> {
         let result = nothingOrErrno(
-            swifthal_can_write(obj, message.id, message.data, message.data.count)
+            swifthal_can_write(obj, message.id, message.data, ssize_t(message.data.count))
         )
 
         if case .failure(let err) = result {
@@ -61,7 +61,7 @@ public final class CAN {
         var id: UInt32 = 0
         var data = [UInt8](repeating: 0, count: 8)
         let result = valueOrErrno(
-            swifthal_can_read(obj, &id, &data, data.count)
+            swifthal_can_read(obj, &id, &data, ssize_t(data.count))
         )
 
         if case .success(let count) = result {
